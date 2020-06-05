@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 // Defining possible flags in F
 const SF: u8 = 0x80;    // 0b10000000
 const ZF: u8 = 0x40;    // 0b01000000
@@ -11,52 +9,55 @@ const NF: u8 = 0x02;    // 0b00000010
 const CF: u8 = 0x01;    // 0b00000001
 
 // Implementing registers
-struct Registers {
-    A: u8,      // accumulator
-    F: u8,      // flags
+pub struct Registers {
+    pub A: u8,      // accumulator
+    pub F: u8,      // flags
 
     // general registers
-    B: u8,      
-    C: u8,
-    D: u8,
-    E: u8,
-    H: u8,
-    L: u8,
+    pub B: u8,      
+    pub C: u8,
+    pub D: u8,
+    pub E: u8,
+    pub H: u8,
+    pub L: u8,
 
     // Alternate register set
-    A_: u8,
-    F_: u8,
+    pub A_: u8,
+    pub F_: u8,
 
-    B_: u8,
-    C_: u8,
-    D_: u8,
-    E_: u8,
-    H_: u8,
-    L_: u8,
+    pub B_: u8,
+    pub C_: u8,
+    pub D_: u8,
+    pub E_: u8,
+    pub H_: u8,
+    pub L_: u8,
 
-    // 16-bit registers
-    AF: u16,        // Double up registers
-    BC: u16,
-    DE: u16,
-    HL: u16,        
+    // 16-bit combined registers
+    pub BC: u16,
+    pub DE: u16,
+    pub HL: u16,        
 
+    // 16-bit combined alternate registers
+    pub BC_: u16,
+    pub DE_: u16,
+    pub HL_: u16,
+    
     // Special registers
-    I : u8,         // Interrupt vector**
-    R : u8,         // Memory refresh
-    IX: u16,        // Index register
-    IY: u16,        // Index register
-    PC: u16,        // Program counter
-    SP: u16,        // Stack pointer
+    pub I : u8,         // Interrupt vector**
+    pub R : u8,         // Memory refresh
+    pub IX: u16,        // Index register
+    pub IY: u16,        // Index register
+    pub PC: u16,        // Program counter
+    pub SP: u16,        // Stack pointer
 }
 
 
-struct CPU {
- 
-
-
-
-
-
+pub struct CPU {        // Move to own file later
+    pub reg: Registers, 
+    
+    pub bus: Bus,       // Implement data bus separately
+    pub address: u16,
+    pub clock_cycles: u32, 
 }
 
 
