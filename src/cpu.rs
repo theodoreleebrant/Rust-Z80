@@ -55,7 +55,9 @@ pub struct Registers {
 pub struct CPU {        // Move to own file later
     pub reg: Registers, // Already contains I, R, PC, SP, IX, IY 
     
-    pub bus: Bus,       // TODO: Implement data bus separately
-    pub address: u16,
+    pub addr_bus: u16,  // 16-bit address bus
+    pub data_bus: u8,   // 8-bit data bus
+
+    pub ram: [u8; 65536],  // 64KB RAM
     pub clock_cycles: u32, // Timing matters 
 }
