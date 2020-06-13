@@ -35,19 +35,19 @@ pub struct Registers {
     // 16-bit combined registers
     pub mut BC: u16,
     pub mut DE: u16,
-    pub mut HL: u16,        
+    pub mut HL: usize,      // (usize to handle indexing)
 
     // 16-bit combined alternate registers
     pub mut BC_: u16,
     pub mut DE_: u16,
-    pub mut HL_: u16,
+    pub mut HL_: usize,     // (usize to handle indexing)
     
     // Special registers
     pub mut I : u8,         // Interrupt vector**
     pub mut R : u8,         // Memory refresh
-    pub mut IX: u16,        // Index register
-    pub mut IY: u16,        // Index register
-    pub mut PC: u16,        // Program counter
+    pub mut IX: usize,      // Index register (usize to handle indexing)
+    pub mut IY: usize,      // Index register (usize to handle indexing)
+    pub mut PC: usize,      // Program counter (usize to handle indexing)
     pub mut SP: u16,        // Stack pointer
 }
 
