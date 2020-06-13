@@ -199,7 +199,16 @@ impl CPU {
         ProgramCounter::Next(4)
     }
     
-    
+    /// FD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
+    /// value in register IY, offset by d.
+    /// 4-byte instruction.
+    pub fn op_FD36dn(d: usize, n: u8) -> ProgramCounter {
+        let addr = self.reg.IY + d;
+        self.ram[addr] = n;
+
+        ProgramCounter::Next(4)
+    }
+     
 
 
 
