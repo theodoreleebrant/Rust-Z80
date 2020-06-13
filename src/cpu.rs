@@ -184,16 +184,22 @@ impl CPU {
     /// 36n: Given immediate n. n is loaded into the memory address specified by contents of HL
     /// register.
     /// 2-byte instruction.
-
     pub fn op_36n(n: u8) -> ProgramCounter {
         self.ram[self.reg.HL] = n;
 
         ProgramCounter::Next(2)
     }
 
-    /// DD36dn: Given immediate n and offset d. n is loaded into the memory address specified by 
+    /// DD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
+    /// value in register IX, offset by d.
+    /// 4-byte instruction.
+    pub fn op_DD36dn(d: u8, n: u8) -> ProgramCounter {
+        let addr = self.reg.IX + d;
+        self.ram[addr] = n;
 
-
+        ProgramCounter::Next(4)
+    }
+    
 
 
 
