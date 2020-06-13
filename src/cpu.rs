@@ -216,4 +216,13 @@ impl CPU {
 
         ProgramCounter::Next(1)
     }
+    
+    /// 1A: Load contents of memory location specified by DE register into A (Accumulator).
+    /// 1-byte instruction.
+    pub fn op_1A() -> ProgramCounter {
+        self.reg.A = self.ram[self.reg.BC];
+
+        ProgramCounter::Next(1)
+    }
+
 }
