@@ -33,13 +33,13 @@ pub struct Registers {
     pub mut L_: u8,
 
     // 16-bit combined registers
-    pub mut BC: u16,
-    pub mut DE: u16,
+    pub mut BC: usize,      // (usize to handle indexing)
+    pub mut DE: usize,      // (usize to handle indexing)
     pub mut HL: usize,      // (usize to handle indexing)
 
     // 16-bit combined alternate registers
-    pub mut BC_: u16,
-    pub mut DE_: u16,
+    pub mut BC_: usize,     // (usize to handle indexing)
+    pub mut DE_: usize,     // (usize to handle indexing)
     pub mut HL_: usize,     // (usize to handle indexing)
     
     // Special registers
@@ -48,7 +48,7 @@ pub struct Registers {
     pub mut IX: usize,      // Index register (usize to handle indexing)
     pub mut IY: usize,      // Index register (usize to handle indexing)
     pub mut PC: usize,      // Program counter (usize to handle indexing)
-    pub mut SP: u16,        // Stack pointer
+    pub mut SP: usize,      // Stack pointer (usize to handle indexing)
 }
 
 // Implementing enum for program counter
