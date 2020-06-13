@@ -209,10 +209,11 @@ impl CPU {
         ProgramCounter::Next(4)
     }
      
+    /// 0A: Load contents of memory location specified by BC register into A (the Accumulator).
+    /// 1-byte instruction. Operands are inferred
+    pub fn op_0A() -> ProgramCounter {
+        self.reg.A = self.ram[self.reg.BC];
 
-
-
-
-
-
+        ProgramCounter::Next(1)
+    }
 }
