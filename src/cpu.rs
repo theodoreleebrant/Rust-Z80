@@ -146,8 +146,7 @@ impl CPU {
            
     /// 00rn: given register r and immediate u8 value n. load n into r
     /// 2-byte instruction
-    pub fn op_00rn(r: u8) -> ProgramCounter {
-        let n = self.ram[self.reg.PC + 1]; // value of intermediate is at next memory slot
+    pub fn op_00rn(r: u8, n: u8) -> ProgramCounter {
         self.load_to(r, n);
 
         ProgramCounter::Next(2)
@@ -157,7 +156,7 @@ impl CPU {
     /// HL is implied and is not included in instruction
     /// 1-byte instruction
     pub fn op_01rHL(r: u8) -> ProgramCounter {
-        let hl = self.reg.HL;
+        let hl = self.reg.HL as u8;
         self.load_to(r, self.ram[hl]);
         
         ProgramCounter::Next(1)
@@ -166,7 +165,7 @@ impl CPU {
     /// DDrd: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
     pub fn op_DDrd(r: u8, d: i8) -> ProgramCounter {
-        let res = self.reg.IX + d;
+        let res = (self.reg.IX as u8) + d ;
         self.load_to(r, res);
         
         ProgramCounter::Next(3)
@@ -175,7 +174,7 @@ impl CPU {
     /// FDrd: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
     pub fn op_FDrd(r: u8, d: i8) -> ProgramCounter {
-        let res = self.reg.IY + d;
+        let res = (self.reg.IY as u8) + d;
         self.load_to(r, res);
         
         ProgramCounter::Next(3)
@@ -193,14 +192,14 @@ impl CPU {
     /// DD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
     /// value in register IX, offset by d.
     /// 4-byte instruction.
-    pub fn op_DD36dn(d: u8, n: u8) -> ProgramCounter {
+    pub fn op_DD36dn(d: usize, n: u8) -> ProgramCounter {
         let addr = self.reg.IX + d;
         self.ram[addr] = n;
 
         ProgramCounter::Next(4)
     }
     
-
+    
 
 
 
