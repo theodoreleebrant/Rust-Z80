@@ -75,8 +75,6 @@ pub struct CPU {        // Move to own file later
     pub mut im:   u8,       // Interrupt Mode 0,1,2
     pub mut nmi:  u8,       // non-maskable interrupt
     pub mut int:  u8,       // maskable interrupt
-
-
 }
 
 impl CPU {
@@ -85,7 +83,7 @@ impl CPU {
    
     /* Reusable code */
 
-    /// load_to takes in a register ID reg_id and content.
+    /// load_to takes in a 1-byte register ID reg_id and content.
     /// Loads content into specified register.
     pub fn load_to(&self, reg_id: u8, content: u8) -> bool {
         match reg_id {
@@ -102,7 +100,7 @@ impl CPU {
         true
     }
 
-    /// load_from takes in a register ID reg_id.
+    /// load_from takes in a 1-byte register ID reg_id.
     /// Outputs content of register as an Option<u8>, returns None if reg_id is not valid.
     pub fn load_from(&self, reg_id: u8) -> Option<u8> {
         Option<u8> result;
@@ -118,27 +116,68 @@ impl CPU {
             .. => result = None,
         }
 
+        if result == Some(None) {
+            return None;
+        }
+
         result
     }
 
-    // OPCODES GOES HERE
-    // Notation:
+    /// load_nn_to takes in 2-byte register ID reg_id and content to write. Outputs an optional
+    /// boolean value to indicate whether reg_id is valid
+    pub fn load_nn_to(&self, reg_id: u8, content: u16) -> bool {
+        match reg_id {
+            0 => self.reg.BC = content,
+            1 => self.reg.DE = content,
+            2 => self.reg.HL = content,
+            3 => self.reg.SP = content,
+            .. => return false,
+        }
+
+        true
+    }
+
+    /// load_nn_from takes in 2-byte register ID reg_id, and retrieve its content.
+    /// Outputs an Option<u16>, or None if reg_id is invalid.
+    pub fn load_nn_from(&self, reg_id: u8) -> Option<u16> {
+        Option<u16> result;
+
+        match reg_id {
+            0 => result = Some(self.reg.BC),
+            1 => result = Some(self.reg.DE),
+            2 => result = Some(self.reg.HL),
+            3 => result = Some(self.reg.SP),
+            .. => result = None,
+        }
+
+        if result == Some(None) {
+            return None;
+        }
+
+        result
+    }
+
+    // NOTATION
+    //
     // ````` Value of Register `````
-    // r: Register
+    // r / x / y: Register
     // (HL): content of memory location stored in register HL
     // (IX+d) or (IY+d): content of memory location IX with offset d
+    // 
     // ````` Data types `````
     // n: one-byte unsigned int
     // nn: two-byte unsigned int
     // d: one-byte signed int
     // b: one-bit expression in range (0 to 7)??
     // e: one-byte signed int for relative jump offset
+    // 
     // ````` Register `````
     // cc: status of Flag Register as any flag
     // qq: BC, DE, HL or AF
     // ss: BC, DE, HL or SP
     // pp: BC, DE, IX or SP
     // rr: BC, DE, IY or SP
+    // 
     // ````` General `````
     // s: Any of r, n, (HL), (IX+d) or (IY+d)
     // m: Any of r, (HL), (IX+d) or (IY+d) (no n)
@@ -320,6 +359,31 @@ impl CPU {
 
         ProgramCounter::Next(2)
     }
+
+    /* 16 Bit Load Group */
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
