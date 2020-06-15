@@ -60,12 +60,21 @@ enum ProgramCounter {
 pub struct CPU {        // Move to own file later
     pub reg: Registers, // Already contains I, R, PC, SP, IX, IY 
     
-    pub addr_bus: u16,  // 16-bit address bus
-    pub data_bus: u8,   // 8-bit data bus
+    pub mut addr_bus: u16,  // 16-bit address bus
+    pub mut data_bus: u8,   // 8-bit data bus
 
-    pub ram: [u8; 65536],  // 64KB RAM
-    pub clock: u32, // Timing matters
-    // Do we need to implement control lines??
+    pub mut ram: [u8; 65536],  // 64KB RAM
+    pub mut clock: u32, // Timing matters
+    
+    // Control signals. Supposedly just bits but Rust doesn't treat boolean as 0 and 1.
+    pub mut halt: u8,
+    pub mut iff1: u8,
+    pub mut iff2: u8,
+    pub mut ei:   u8,
+    pub mut im:   u8,
+    pub mut nmi:  u8,
+    pub mut int:  u8,
+
 }
 
 impl CPU {
@@ -271,8 +280,7 @@ impl CPU {
             self.reg.F |= HF;           // F = 1 if I == 0
         }                           
 
-        self.reg.F |= (
-            self.internal_bits.IFF2 << 2); // P = IFF2
+        self.reg.F |= (self.iff2 << 2); // P = IFF2
 
         ProgramCounter::Next(2)
     }
@@ -290,8 +298,7 @@ impl CPU {
             self.reg.F |= HF;           // F = 1 if I == 0
         }                           
 
-        self.reg.F |= (
-            self.internal_bits.IFF2 << 2); // P = IFF2
+        self.reg.F |= (self.iff2 << 2); // P = IFF2
 
         ProgramCounter::Next(2)
     }
