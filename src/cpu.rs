@@ -226,4 +226,94 @@ impl CPU {
         ProgramCounter::Next(1)
     }
 
+    /// ld_A_nn: contents of memory location nn are loaded into A.
+    /// 3-byte instruction
+    pub fn ld_A_nn(nn: u16) -> ProgramCounter{
+        self.reg.A = self.ram[nn as usize];
+
+        ProgramCounter::Next(3)
+    }
+
+    /// ld_BC_A: Contents of A are loaded to memory location specified by register BC.
+    /// 1-byte instruction.
+    pub fn ld_BC_A() -> ProgramCounter {
+        self.ram[self.reg.BC] = self.reg.A;
+
+        ProgramCounter::Next(1)
+    }
+
+    /// ld_DE_A: Contents of A are loaded to memory location specified by register DE.
+    /// 1-byte instruction.
+    pub fn ld_DE_A() -> ProgramCounter {
+        self.ram[self.reg.DE] = self.reg.A;
+
+        ProgramCounter::Next(1)
+    }
+
+    /// ld_nn_A: Contents of A are loaded to memory location specified by operand nn.
+    /// 3-byte instruction.
+    pub fn ld_nn_A(nn: u16) -> ProgramCounter {
+        self.ram[nn as usize] = self.reg.A;
+
+        ProgramCounter::Next(3)
+    }
+
+    /// ld_A_I: Contents of I (Interrupt Vector) are loaded to register A.
+    /// 2-byte instruction.
+    pub fn ld_A_I() -> ProgramCounter {
+        self.reg.A = self.reg.I;
+
+        // Configure flags
+        self.reg.F &= 0b00000001; // reset all bits except C. N = 0, H = 0
+        if self.reg.I < 0 {
+            self.reg.F |= SF;           // S = 1 if I < 0
+        } else if self.reg.I == 0 {
+            self.reg.F |= HF;           // F = 1 if I == 0
+        }                           
+
+        self.reg.F |= (
+            self.internal_bits.IFF2 << 2); // P = IFF2
+
+        ProgramCounter::Next(2)
+    }
+
+    /// ld_A_R: Contents of R (Mem Refresh) are loaded to Accumulator
+    /// 2-byte instruction.
+    pub fn ld_A_R() -> ProgramCounter {
+        self.reg.A = self.reg.R;
+
+        // Configure flags
+        self.reg.F &= 0b00000001; // reset all bits except C. N = 0, H = 0
+        if self.reg.R < 0 {
+            self.reg.F |= SF;           // S = 1 if I < 0
+        } else if self.reg.R == 0 {
+            self.reg.F |= HF;           // F = 1 if I == 0
+        }                           
+
+        self.reg.F |= (
+            self.internal_bits.IFF2 << 2); // P = IFF2
+
+        ProgramCounter::Next(2)
+    }
+
+    /// ld_I_A: Contents of Accumulator are loaded to I (Interrupt Vector)
+    /// 2-byte instruction
+    pub fn ld_I_A() -> ProgramCounter {
+        self.reg.I = self.reg.A;
+
+        ProgramCounter::Next(2)
+    }
+
+    /// ld_R_A: Contents of Accumulator are loaded to R (Mem Refresh)
+    /// 2-byte instruction
+    pub fn ld_R_A() -> ProgramCounter {
+        self.reg.R = self.reg.A;
+
+        ProgramCounter::Next(2)
+    }
+
+
+
+
+
 }
