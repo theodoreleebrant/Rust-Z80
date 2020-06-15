@@ -66,14 +66,16 @@ pub struct CPU {        // Move to own file later
     pub mut ram: [u8; 65536],  // 64KB RAM
     pub mut clock: u32, // Timing matters
     
-    // Control signals. Supposedly just bits but Rust doesn't treat boolean as 0 and 1.
+    // Control signals. Supposedly just bits but Rust doesn't treat boolean as 0 and 1. Check out
+    // Z80 manual page 31.
     pub mut halt: u8,
-    pub mut iff1: u8,
-    pub mut iff2: u8,
-    pub mut ei:   u8,
-    pub mut im:   u8,
-    pub mut nmi:  u8,
-    pub mut int:  u8,
+    pub mut iff1: u8,       // disable interrupts from being accepted
+    pub mut iff2: u8,       // temp. storage for iff1
+    pub mut ei:   u8,       // Enable Interrupt signal
+    pub mut im:   u8,       // Interrupt Mode 0,1,2
+    pub mut nmi:  u8,       // non-maskable interrupt
+    pub mut int:  u8,       // maskable interrupt
+
 
 }
 
