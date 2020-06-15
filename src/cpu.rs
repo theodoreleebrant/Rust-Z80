@@ -71,7 +71,9 @@ pub struct CPU {        // Move to own file later
 impl CPU {
     // Functions for initalization, load program, tick, run opcode.
     // For now, dk what's the state of Z80 when first initialized.
-    
+   
+    /* Reusable code */
+
     /// load_to takes in a register ID reg_id and content.
     /// Loads content into specified register.
     pub fn load_to(&self, reg_id: u8, content: u8) -> bool {
@@ -130,9 +132,8 @@ impl CPU {
     // s: Any of r, n, (HL), (IX+d) or (IY+d)
     // m: Any of r, (HL), (IX+d) or (IY+d) (no n)
 
-    // 8-bit Load group
-    //
-    
+    /* 8-bit Load group */
+        
     /// 01rxry: given 2 registers rx and ry, load value of ry into rx,
     /// 1-byte instruction
     pub fn op_01rxry(rx: u8, ry: u8) -> ProgramCounter {
