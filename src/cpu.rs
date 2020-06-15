@@ -134,9 +134,9 @@ impl CPU {
 
     /* 8-bit Load group */
         
-    /// 01rxry: given 2 registers rx and ry, load value of ry into rx,
+    /// ld_x_y: given 2 registers rx and ry, load value of ry into rx,
     /// 1-byte instruction
-    pub fn op_01rxry(rx: u8, ry: u8) -> ProgramCounter {
+    pub fn ld_x_y(rx: u8, ry: u8) -> ProgramCounter {
        match self.load_from(ry) {
            None => (), // FIXME: How do i handle error here
            Some(value) => self.load_to(rx, value),
@@ -145,55 +145,55 @@ impl CPU {
        ProgramCounter::Next(1) // Increment the program counter
     }
            
-    /// 00rn: given register r and immediate u8 value n. load n into r
+    /// ld_r_n: given register r and immediate u8 value n. load n into r
     /// 2-byte instruction
-    pub fn op_00rn(r: u8, n: u8) -> ProgramCounter {
+    pub fn ld_r_n(r: u8, n: u8) -> ProgramCounter {
         self.load_to(r, n);
 
         ProgramCounter::Next(2)
     }
 
-    /// 01rHL: given register r, load value pointed to by value in register HL into r.
+    /// ld_r_HL: given register r, load value pointed to by value in register HL into r.
     /// HL is implied and is not included in instruction
     /// 1-byte instruction
-    pub fn op_01rHL(r: u8) -> ProgramCounter {
+    pub fn ld_r_HL(r: u8) -> ProgramCounter {
         let hl = self.reg.HL as u8;
         self.load_to(r, self.ram[hl]);
         
         ProgramCounter::Next(1)
     }
 
-    /// DDrd: given register r and offset d, load contents of IX + offset d to register r.
+    /// ld_r_IX: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
-    pub fn op_DDrd(r: u8, d: i8) -> ProgramCounter {
+    pub fn ld_r_IX(r: u8, d: i8) -> ProgramCounter {
         let res = (self.reg.IX as u8) + d ;
         self.load_to(r, res);
         
         ProgramCounter::Next(3)
     }
     
-    /// FDrd: given register r and offset d, load contents of IX + offset d to register r.
+    /// ld_r_IY: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
-    pub fn op_FDrd(r: u8, d: i8) -> ProgramCounter {
+    pub fn ld_r_IY(r: u8, d: i8) -> ProgramCounter {
         let res = (self.reg.IY as u8) + d;
         self.load_to(r, res);
         
         ProgramCounter::Next(3)
     }
 
-    /// 36n: Given immediate n. n is loaded into the memory address specified by contents of HL
+    /// ld_HL_r: Given immediate n. n is loaded into the memory address specified by contents of HL
     /// register.
     /// 2-byte instruction.
-    pub fn op_36n(n: u8) -> ProgramCounter {
+    pub fn ld_HR_r(n: u8) -> ProgramCounter {
         self.ram[self.reg.HL] = n;
 
         ProgramCounter::Next(2)
     }
 
-    /// DD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
+    /// ld_IX_r: Given immediate n and offset d. n is loaded into the memory address specified by
     /// value in register IX, offset by d.
     /// 4-byte instruction.
-    pub fn op_DD36dn(d: usize, n: u8) -> ProgramCounter {
+    pub fn ld_IX_r(d: usize, n: u8) -> ProgramCounter {
         let addr = self.reg.IX + d;
         self.ram[addr] = n;
 
@@ -203,25 +203,25 @@ impl CPU {
     /// FD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
     /// value in register IY, offset by d.
     /// 4-byte instruction.
-    pub fn op_FD36dn(d: usize, n: u8) -> ProgramCounter {
+    pub fn ld_IY_r(d: usize, n: u8) -> ProgramCounter {
         let addr = self.reg.IY + d;
         self.ram[addr] = n;
 
         ProgramCounter::Next(4)
     }
      
-    /// 0A: Load contents of memory location specified by BC register into A (the Accumulator).
+    /// ld_A_BC: Load contents of memory location specified by BC register into A (the Accumulator).
     /// 1-byte instruction. Operands are inferred
-    pub fn op_0A() -> ProgramCounter {
+    pub fn ld_A_BC() -> ProgramCounter {
         self.reg.A = self.ram[self.reg.BC];
 
         ProgramCounter::Next(1)
     }
     
-    /// 1A: Load contents of memory location specified by DE register into A (Accumulator).
+    /// ld_A_DE: Load contents of memory location specified by DE register into A (Accumulator).
     /// 1-byte instruction.
-    pub fn op_1A() -> ProgramCounter {
-        self.reg.A = self.ram[self.reg.BC];
+    pub fn ld_A_DE() -> ProgramCounter {
+        self.reg.A = self.ram[self.reg.DE];
 
         ProgramCounter::Next(1)
     }
