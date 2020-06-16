@@ -49,22 +49,22 @@ pub struct Registers {
     pub mut L_: u8,
 
     // 16-bit combined registers
-    pub mut BC: usize,      // (usize to handle indexing)
-    pub mut DE: usize,      // (usize to handle indexing)
-    pub mut HL: usize,      // (usize to handle indexing)
+    pub mut BC: u16
+    pub mut DE: u16,   
+    pub mut HL: u16,   
 
     // 16-bit combined alternate registers
-    pub mut BC_: usize,     // (usize to handle indexing)
-    pub mut DE_: usize,     // (usize to handle indexing)
-    pub mut HL_: usize,     // (usize to handle indexing)
+    pub mut BC_: u16,   
+    pub mut DE_: u16,    
+    pub mut HL_: u16,     
     
     // Special registers
-    pub mut I : u8,         // Interrupt vector**
-    pub mut R : u8,         // Memory refresh
-    pub mut IX: usize,      // Index register (usize to handle indexing)
-    pub mut IY: usize,      // Index register (usize to handle indexing)
-    pub mut PC: usize,      // Program counter (usize to handle indexing)
-    pub mut SP: usize,      // Stack pointer (usize to handle indexing)
+    pub mut I : u8,        
+    pub mut R : u8,        
+    pub mut IX: u16,     
+    pub mut IY: u16,     
+    pub mut PC: u16,     
+    pub mut SP: u16,      
 }
 
 // Implementing enum for program counter
@@ -158,12 +158,12 @@ impl CPU {
     /// boolean value to indicate whether reg_id is valid
     pub fn write_nn_to_reg(&self, reg_id: u8, content: u16) -> bool {
         match reg_id {
-            ID_BC => self.reg.BC = content as usize,
-            ID_DE => self.reg.DE = content as usize,
-            ID_HL => self.reg.HL = content as usize,
-            ID_SP => self.reg.SP = content as usize,
-            ID_IX => self.reg.IX = content as usize,
-            ID_IY => self.reg.IY = content as usize,
+            ID_BC => self.reg.BC = content,
+            ID_DE => self.reg.DE = content,
+            ID_HL => self.reg.HL = content,
+            ID_SP => self.reg.SP = content,
+            ID_IX => self.reg.IX = content,
+            ID_IY => self.reg.IY = content,
             .. => return false,
         }
 
@@ -176,12 +176,12 @@ impl CPU {
         Option<u16> result;
 
         match reg_id {
-            ID_BC => result = Some(self.reg.BC as u16),
-            ID_DE => result = Some(self.reg.DE as u16),
-            ID_HL => result = Some(self.reg.HL as u16),
-            ID_SP => result = Some(self.reg.SP as u16),
-            ID_IX => result = Some(self.reg.IX as u16),
-            ID_IY => result = Some(self.reg.IY as u16),
+            ID_BC => result = Some(self.reg.BC),
+            ID_DE => result = Some(self.reg.DE),
+            ID_HL => result = Some(self.reg.HL),
+            ID_SP => result = Some(self.reg.SP),
+            ID_IX => result = Some(self.reg.IX),
+            ID_IY => result = Some(self.reg.IY),
             .. => result = None,
         }
 
