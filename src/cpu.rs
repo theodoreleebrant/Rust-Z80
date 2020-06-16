@@ -451,30 +451,67 @@ impl CPU {
     /// ld_dd_nn: Contents of  memory address (nn) are loaded to lower-byte register pair dd, while
     /// content at (nn+1) are loaded to higher-order byte.
     /// 4-byte instruction
-    pub fn ld_dd_addr_nn(dd: u8, nn: u16) {
+    pub fn ld_dd_addr_nn(dd: u8, nn: u16) -> ProgramCounter{
         self.write_nn_mem_to_reg(dd, nn);
 
         ProgramCounter::Next(4)
     }
 
-    /// ld_IX_nn: Contents of memory address (nn) are loaded to lower-byte of IX, while content at
+    /// ld_IX_addr_nn: Contents of memory address (nn) are loaded to lower-byte of IX, while content at
     /// (nn+1) are loaded to higher-order byte.
     /// 4-byte instruction
-    pub fn ld_IX_addr_nn(nn: u16) {
+    pub fn ld_IX_addr_nn(nn: u16) -> ProgramCounter {
         self.write_nn_mem_to_reg(ID_IX, nn);
 
         ProgramCounter::Next(4)
     }
 
-    /// ld_IY_nn: Contents of memory address (nn) are loaded to lower-byte of IY, while content at
+    /// ld_IY_addr_nn: Contents of memory address (nn) are loaded to lower-byte of IY, while content at
     /// (nn+1) are loaded to higher-order byte.
     /// 4-byte instruction
-    pub fn ld_IY_addr_nn(nn: u16) {
+    pub fn ld_IY_addr_nn(nn: u16) -> ProgramCounter {
         self.write_nn_mem_to_reg(ID_IY, nn);
 
         ProgramCounter::Next(4)
     }
 
+    /// ld_addr_nn_HL: Lower-order byte of HL is loaded to memory address (nn), higher-order byte of HL is
+    /// loaded to memory address (nn + 1)
+    /// 3-byte instruction
+    pub fn ld_addr_nn_HL(nn: u16) -> ProgramCounter {
+        self.write_nn_reg_to_mem(ID_HL, nn);
+
+        ProgramCounter::Next(3)
+    }
+
+    /// ld_addr_nn_dd: Lower-order byte of register pair dd is loaded to memory address (nn),
+    /// higher-order byte is loaded to address (n + 1)
+    /// 4-byte instruction
+    pub fn ld_addr_nn_dd(dd: u8, nn: u16) -> ProgramCounter {
+        self.write_nn_reg_to_mem(dd, nn);
+
+        ProgramCounter::Next(4)
+    }
+
+    /// ld_addr_nn_IX: Lower_order byte of IX is loaded to mem address (nn), higher-order byte is
+    /// loaded to memory address (nn + 1)
+    /// 4-byte instruction
+    pub fn ld_addr_nn_IX(nn: u16) -> ProgramCounter {
+        self.write_nn_reg_to_mem(ID_IX, nn);
+
+        ProgramCounter::Next(4)
+    }
+
+    /// ld_addr_nn_IY: Lower_order byte of IY is loaded to mem address (nn), higher-order byte is
+    /// loaded to memory address (nn + 1)
+    /// 4-byte instruction
+    pub fn ld_addr_nn_IY(nn: u16) -> ProgramCounter {
+        self.write_nn_reg_to_mem(ID_IY, nn);
+
+        ProgramCounter::Next(4)
+    }
+    
+    
 
 
 
