@@ -8,6 +8,19 @@ const PF: u8 = 0x04;    // 0b00000100
 const NF: u8 = 0x02;    // 0b00000010
 const CF: u8 = 0x01;    // 0b00000001
 
+// Defining ID for registers
+const ID_A: u8 = 0b111;
+const ID_B: u8 = 0b000;
+const ID_C: u8 = 0b001;
+const ID_D: u8 = 0b010;
+const ID_E: u8 = 0b011;
+const ID_H: u8 = 0b100;
+const ID_L: u8 = 0b101;
+const ID_BC: u8 = 0b00;
+const ID_DE: u8 = 0b01;
+const ID_HL: u8 = 0b10;
+const ID_SP: u8 = 0b11;
+
 // Implementing registers
 pub struct Registers {
     pub mut A: u8,      // accumulator
@@ -87,13 +100,13 @@ impl CPU {
     /// Loads content into specified register.
     pub fn write_to_reg(&self, reg_id: u8, content: u8) -> bool {
         match reg_id {
-            0 => self.reg.B = content,
-            1 => self.reg.C = content,
-            2 => self.reg.D = content,
-            3 => self.reg.E = content,
-            4 => self.reg.H = content,
-            5 => self.reg.L = content,
-            7 => self.reg.A = content,
+            ID_A => self.reg.A = content,
+            ID_B => self.reg.B = content,
+            ID_C => self.reg.C = content,
+            ID_D => self.reg.D = content,
+            ID_E => self.reg.E = content,
+            ID_H => self.reg.H = content,
+            ID_L => self.reg.L = content,
             .. => return false,
         }
 
@@ -106,13 +119,13 @@ impl CPU {
         Option<u8> result;
 
         match reg_id {
-            0 => result = Some(self.reg.B),
-            1 => result = Some(self.reg.C),
-            2 => result = Some(self.reg.D),
-            3 => result = Some(self.reg.E),
-            4 => result = Some(self.reg.H),
-            5 => result = Some(self.reg.L),
-            7 => result = Some(self.reg.A),
+            ID_A => result = Some(self.reg.A),
+            ID_B => result = Some(self.reg.B),
+            ID_C => result = Some(self.reg.C),
+            ID_D => result = Some(self.reg.D),
+            ID_E => result = Some(self.reg.E),
+            ID_H => result = Some(self.reg.H),
+            ID_L => result = Some(self.reg.L),
             .. => result = None,
         }
 
@@ -142,10 +155,10 @@ impl CPU {
     /// boolean value to indicate whether reg_id is valid
     pub fn write_nn_to_reg(&self, reg_id: u8, content: u16) -> bool {
         match reg_id {
-            0 => self.reg.BC = content as usize,
-            1 => self.reg.DE = content as usize,
-            2 => self.reg.HL = content as usize,
-            3 => self.reg.SP = content as usize,
+            ID_BC => self.reg.BC = content as usize,
+            ID_DE => self.reg.DE = content as usize,
+            ID_HL => self.reg.HL = content as usize,
+            ID_SP => self.reg.SP = content as usize,
             .. => return false,
         }
 
@@ -158,10 +171,10 @@ impl CPU {
         Option<u16> result;
 
         match reg_id {
-            0 => result = Some(self.reg.BC as u16),
-            1 => result = Some(self.reg.DE as u16),
-            2 => result = Some(self.reg.HL as u16),
-            3 => result = Some(self.reg.SP as u16),
+            ID_BC => result = Some(self.reg.BC as u16),
+            ID_DE => result = Some(self.reg.DE as u16),
+            ID_HL => result = Some(self.reg.HL as u16),
+            ID_SP => result = Some(self.reg.SP as u16),
             .. => result = None,
         }
 
@@ -274,7 +287,7 @@ impl CPU {
     /// ld_A_BC: Load contents of memory location specified by BC register into A (the Accumulator).
     /// 1-byte instruction. Operands are inferred
     pub fn ld_A_BC() -> ProgramCounter {
-        self.reg.A = self.ram[self.reg.BC];
+        self.write_mem_to_reg(ID_A, self.reg.BC);
 
         ProgramCounter::Next(1)
     }
@@ -282,7 +295,7 @@ impl CPU {
     /// ld_A_DE: Load contents of memory location specified by DE register into A (Accumulator).
     /// 1-byte instruction.
     pub fn ld_A_DE() -> ProgramCounter {
-        self.reg.A = self.ram[self.reg.DE];
+        self.write_mem_to_reg(ID_A, self.reg.DE);
 
         ProgramCounter::Next(1)
     }
@@ -290,7 +303,7 @@ impl CPU {
     /// ld_A_nn: contents of memory location nn are loaded into A.
     /// 3-byte instruction
     pub fn ld_A_nn(nn: u16) -> ProgramCounter{
-        self.reg.A = self.ram[nn as usize];
+        self.write_mem_to_reg(ID_A, nn);
 
         ProgramCounter::Next(3)
     }
@@ -298,7 +311,7 @@ impl CPU {
     /// ld_BC_A: Contents of A are loaded to memory location specified by register BC.
     /// 1-byte instruction.
     pub fn ld_BC_A() -> ProgramCounter {
-        self.ram[self.reg.BC] = self.reg.A;
+        self.write_reg_to_mem(ID_A, self.reg.BC);
 
         ProgramCounter::Next(1)
     }
@@ -306,7 +319,7 @@ impl CPU {
     /// ld_DE_A: Contents of A are loaded to memory location specified by register DE.
     /// 1-byte instruction.
     pub fn ld_DE_A() -> ProgramCounter {
-        self.ram[self.reg.DE] = self.reg.A;
+        self.write_reg_to_mem(ID_A, self.reg.DE);
 
         ProgramCounter::Next(1)
     }
@@ -314,7 +327,7 @@ impl CPU {
     /// ld_nn_A: Contents of A are loaded to memory location specified by operand nn.
     /// 3-byte instruction.
     pub fn ld_nn_A(nn: u16) -> ProgramCounter {
-        self.ram[nn as usize] = self.reg.A;
+        self.write_reg_to_mem(ID_A, nn);
 
         ProgramCounter::Next(3)
     }
