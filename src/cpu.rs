@@ -9,17 +9,20 @@ const NF: u8 = 0x02;    // 0b00000010
 const CF: u8 = 0x01;    // 0b00000001
 
 // Defining ID for registers
-const ID_A: u8 = 0b111;
+const ID_A: u8 = 0b111; // 8-bit registers
 const ID_B: u8 = 0b000;
 const ID_C: u8 = 0b001;
 const ID_D: u8 = 0b010;
 const ID_E: u8 = 0b011;
 const ID_H: u8 = 0b100;
 const ID_L: u8 = 0b101;
-const ID_BC: u8 = 0b00;
-const ID_DE: u8 = 0b01;
-const ID_HL: u8 = 0b10;
-const ID_SP: u8 = 0b11;
+                        
+const ID_BC: u8 = 0b000; // 16-bit registers
+const ID_DE: u8 = 0b001;
+const ID_HL: u8 = 0b010;
+const ID_SP: u8 = 0b011;
+const ID_IX: u8 = 0b110;
+const ID_IY: u8 = 0b111;
 
 // Implementing registers
 pub struct Registers {
@@ -139,13 +142,13 @@ impl CPU {
     /// write_mem_to_reg: Takes in a 1-byte register ID reg_id and an address from which content is
     /// read from. Boolean value is returned.
     pub fn load_mem_to_reg(&self, reg_id: u8, address: u16) -> bool {
-        write_to_reg(reg_id, self.ram[address as usize])
+        self.write_to_reg(reg_id, self.ram[address as usize])
     }
 
     /// write_reg_to_mem: Takes in a 1-byte register ID reg_id and an address from which content
     /// will be writen to. If no content is retrieved from register, do nothing.
     pub fn write_reg_to_mem(&self, reg_id: u8, address: u16) {
-        match load_from_reg(reg_id) {
+        match self.load_from_reg(reg_id) {
             Some(val) -> self.ram[address as usize] = val,
             None -> return (),
         }
@@ -159,6 +162,8 @@ impl CPU {
             ID_DE => self.reg.DE = content as usize,
             ID_HL => self.reg.HL = content as usize,
             ID_SP => self.reg.SP = content as usize,
+            ID_IX => self.reg.IX = content as usize,
+            ID_IY => self.reg.IY = content as usize,
             .. => return false,
         }
 
@@ -175,6 +180,8 @@ impl CPU {
             ID_DE => result = Some(self.reg.DE as u16),
             ID_HL => result = Some(self.reg.HL as u16),
             ID_SP => result = Some(self.reg.SP as u16),
+            ID_IX => result = Some(self.reg.IX as u16),
+            ID_IY => result = Some(self.reg.IY as u16),
             .. => result = None,
         }
 
@@ -183,6 +190,28 @@ impl CPU {
         }
 
         result
+    }
+
+    /// write_nn_mem_to_reg: Takes in a 2-byte register ID reg_id and a memory address. Contents of
+    /// ram[addr] is loaded to lower-order byte, ram[addr + 1] is loaded as higher order byte.
+    pub fn write_nn_mem_to_reg(&self, reg_id: u8, addr: u16) -> bool {
+        let content = self.ram[addr as usize] |
+                        self.ram[(addr + 1) as usize];
+
+        self.write_nn_to_reg(reg_id, content)
+    }
+
+    /// write_nn_reg_to_mem: Takes in a 2-byte register ID (reg_id) and a memory address.
+    /// lower order byte -> ram[addr]
+    /// higher order byte -> ram[addr + 1]
+    pub fn write_nn_reg_to_mem(&self, reg_id: u8, addr: u16) {
+        match load_nn_from_reg(reg_id) {
+            Some(content) => {
+                self.ram[addr] = (content & 0x00FF) as u8;
+                self.ram[addr + 1] = (content >> 8) as u8;
+            },
+            None => return (),
+        }
     }
 
     // NOTATION
@@ -389,7 +418,7 @@ impl CPU {
     /// ld_dd_nn: 2-byte integer nn is loaded to dd register pair.
     /// 3-byte instruction
     pub fn ld_dd_nn(dd: u8, nn: u16) -> ProgramCounter {
-        load_nn_to(dd, nn);
+        self.write_nn_to_reg(dd, nn);
 
         ProgramCounter::Next(3)
     }
@@ -413,10 +442,8 @@ impl CPU {
     /// ld_HL_nn: Contents of memory address (nn) are loaded to low-order byte of HL and contents
     /// of next memory address (nn + 1) are loaded to higher-order portion of HL.
     /// 3-byte instruction
-    pub fn ld_HL_nn(nn: u16) -> ProgramCounter {
-        let content = self.ram[nn as usize] | 
-                            (self.ram[(nn + 1) as usize] << 8);
-        self.reg.HL = content as usize;
+    pub fn ld_HL_addr_nn(nn: u16) -> ProgramCounter {
+        self.write_nn_mem_to_reg(ID_HL, nn);
 
         ProgramCounter::Next(3)
     }
@@ -424,10 +451,8 @@ impl CPU {
     /// ld_dd_nn: Contents of  memory address (nn) are loaded to lower-byte register pair dd, while
     /// content at (nn+1) are loaded to higher-order byte.
     /// 4-byte instruction
-    pub fn ld_dd_nn(dd: u8, nn: u16) {
-        let content = self.ram[nn as usize] |
-                            (self.ram[(nn + 1) as usize] << 8);
-        load_nn_to(dd, content);
+    pub fn ld_dd_addr_nn(dd: u8, nn: u16) {
+        self.write_nn_mem_to_reg(dd, nn);
 
         ProgramCounter::Next(4)
     }
@@ -435,10 +460,17 @@ impl CPU {
     /// ld_IX_nn: Contents of memory address (nn) are loaded to lower-byte of IX, while content at
     /// (nn+1) are loaded to higher-order byte.
     /// 4-byte instruction
-    pub fn ld_IX_nn(nn: u16) {
-        let content = self.ram[nn as usize] |
-                        (self.ram[(nn + 1) as usize] << 8);
-        self.reg.IX = content as usize;
+    pub fn ld_IX_addr_nn(nn: u16) {
+        self.write_nn_mem_to_reg(ID_IX, nn);
+
+        ProgramCounter::Next(4)
+    }
+
+    /// ld_IY_nn: Contents of memory address (nn) are loaded to lower-byte of IY, while content at
+    /// (nn+1) are loaded to higher-order byte.
+    /// 4-byte instruction
+    pub fn ld_IY_addr_nn(nn: u16) {
+        self.write_nn_mem_to_reg(ID_IY, nn);
 
         ProgramCounter::Next(4)
     }
