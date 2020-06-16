@@ -85,7 +85,7 @@ impl CPU {
 
     /// load_to takes in a 1-byte register ID reg_id and content.
     /// Loads content into specified register.
-    pub fn load_to(&self, reg_id: u8, content: u8) -> bool {
+    pub fn write_to_reg(&self, reg_id: u8, content: u8) -> bool {
         match reg_id {
             0 => self.reg.B = content,
             1 => self.reg.C = content,
@@ -102,7 +102,7 @@ impl CPU {
 
     /// load_from takes in a 1-byte register ID reg_id.
     /// Outputs content of register as an Option<u8>, returns None if reg_id is not valid.
-    pub fn load_from(&self, reg_id: u8) -> Option<u8> {
+    pub fn load_from_reg(&self, reg_id: u8) -> Option<u8> {
         Option<u8> result;
 
         match reg_id {
@@ -123,9 +123,24 @@ impl CPU {
         result
     }
 
+    /// write_mem_to_reg: Takes in a 1-byte register ID reg_id and an address from which content is
+    /// read from. Boolean value is returned.
+    pub fn load_mem_to_reg(&self, reg_id: u8, address: u16) -> bool {
+        write_to_reg(reg_id, self.ram[address as usize])
+    }
+
+    /// write_reg_to_mem: Takes in a 1-byte register ID reg_id and an address from which content
+    /// will be writen to. If no content is retrieved from register, do nothing.
+    pub fn write_reg_to_mem(&self, reg_id: u8, address: u16) {
+        match load_from_reg(reg_id) {
+            Some(val) -> self.ram[address as usize] = val,
+            None -> return (),
+        }
+    }
+
     /// load_nn_to takes in 2-byte register ID reg_id and content to write. Outputs an optional
     /// boolean value to indicate whether reg_id is valid
-    pub fn load_nn_to(&self, reg_id: u8, content: u16) -> bool {
+    pub fn write_nn_to_reg(&self, reg_id: u8, content: u16) -> bool {
         match reg_id {
             0 => self.reg.BC = content as usize,
             1 => self.reg.DE = content as usize,
@@ -139,7 +154,7 @@ impl CPU {
 
     /// load_nn_from takes in 2-byte register ID reg_id, and retrieve its content.
     /// Outputs an Option<u16>, or None if reg_id is invalid.
-    pub fn load_nn_from(&self, reg_id: u8) -> Option<u16> {
+    pub fn load_nn_from_reg(&self, reg_id: u8) -> Option<u16> {
         Option<u16> result;
 
         match reg_id {
@@ -188,9 +203,9 @@ impl CPU {
     /// ld_x_y: given 2 registers rx and ry, load value of ry into rx,
     /// 1-byte instruction
     pub fn ld_x_y(rx: u8, ry: u8) -> ProgramCounter {
-       match self.load_from(ry) {
+       match self.load_from_reg(ry) {
            None => (), // FIXME: How do i handle error here
-           Some(value) => self.load_to(rx, value),
+           Some(value) => self.write_to_reg(rx, value),
        }
 
        ProgramCounter::Next(1) // Increment the program counter
@@ -199,7 +214,7 @@ impl CPU {
     /// ld_r_n: given register r and immediate u8 value n. load n into r
     /// 2-byte instruction
     pub fn ld_r_n(r: u8, n: u8) -> ProgramCounter {
-        self.load_to(r, n);
+        self.write_to_reg(r, n);
 
         ProgramCounter::Next(2)
     }
@@ -208,35 +223,32 @@ impl CPU {
     /// HL is implied and is not included in instruction
     /// 1-byte instruction
     pub fn ld_r_HL(r: u8) -> ProgramCounter {
-        let hl = self.reg.HL as u8;
-        self.load_to(r, self.ram[hl]);
+        self.write_mem_to_reg(r, self.reg.HL);
         
         ProgramCounter::Next(1)
     }
 
     /// ld_r_IX: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
-    pub fn ld_r_IX(r: u8, d: i8) -> ProgramCounter {
-        let res = (self.reg.IX as u8) + d ;
-        self.load_to(r, res);
+    pub fn ld_r_IX(r: u8, d: i16) -> ProgramCounter {
+        self.write_mem_to_reg(r, self.reg.IX + d);
         
         ProgramCounter::Next(3)
     }
     
     /// ld_r_IY: given register r and offset d, load contents of IX + offset d to register r.
     /// 3-byte instruction
-    pub fn ld_r_IY(r: u8, d: i8) -> ProgramCounter {
-        let res = (self.reg.IY as u8) + d;
-        self.load_to(r, res);
-        
+    pub fn ld_r_IY(r: u8, d: i16) -> ProgramCounter {
+        self.write_mem_to_reg(r, self.reg.IY + d);
+
         ProgramCounter::Next(3)
     }
 
-    /// ld_HL_r: Given immediate n. n is loaded into the memory address specified by contents of HL
+    /// ld_HL_r: Given register r. contents of r are loaded into the memory address specified by contents of HL
     /// register.
     /// 2-byte instruction.
-    pub fn ld_HR_r(n: u8) -> ProgramCounter {
-        self.ram[self.reg.HL] = n;
+    pub fn ld_HL_r(r: u8) -> ProgramCounter {
+        self.write_reg_to_mem(r, self.reg.HL);
 
         ProgramCounter::Next(2)
     }
@@ -244,9 +256,8 @@ impl CPU {
     /// ld_IX_r: Given immediate n and offset d. n is loaded into the memory address specified by
     /// value in register IX, offset by d.
     /// 4-byte instruction.
-    pub fn ld_IX_r(d: usize, n: u8) -> ProgramCounter {
-        let addr = self.reg.IX + d;
-        self.ram[addr] = n;
+    pub fn ld_IX_r(r: u8, d: i16) -> ProgramCounter {
+        self.write_reg_to_mem(r, self.reg.IX + d);
 
         ProgramCounter::Next(4)
     }
@@ -254,9 +265,8 @@ impl CPU {
     /// FD36dn: Given immediate n and offset d. n is loaded into the memory address specified by
     /// value in register IY, offset by d.
     /// 4-byte instruction.
-    pub fn ld_IY_r(d: usize, n: u8) -> ProgramCounter {
-        let addr = self.reg.IY + d;
-        self.ram[addr] = n;
+    pub fn ld_IY_r(r: u8, d: i16) -> ProgramCounter {
+        self.write_reg_to_mem(r, self.reg.IY + d);
 
         ProgramCounter::Next(4)
     }
