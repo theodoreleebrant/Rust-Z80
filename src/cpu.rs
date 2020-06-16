@@ -127,10 +127,10 @@ impl CPU {
     /// boolean value to indicate whether reg_id is valid
     pub fn load_nn_to(&self, reg_id: u8, content: u16) -> bool {
         match reg_id {
-            0 => self.reg.BC = content,
-            1 => self.reg.DE = content,
-            2 => self.reg.HL = content,
-            3 => self.reg.SP = content,
+            0 => self.reg.BC = content as usize,
+            1 => self.reg.DE = content as usize,
+            2 => self.reg.HL = content as usize,
+            3 => self.reg.SP = content as usize,
             .. => return false,
         }
 
@@ -143,10 +143,10 @@ impl CPU {
         Option<u16> result;
 
         match reg_id {
-            0 => result = Some(self.reg.BC),
-            1 => result = Some(self.reg.DE),
-            2 => result = Some(self.reg.HL),
-            3 => result = Some(self.reg.SP),
+            0 => result = Some(self.reg.BC as u16),
+            1 => result = Some(self.reg.DE as u16),
+            2 => result = Some(self.reg.HL as u16),
+            3 => result = Some(self.reg.SP as u16),
             .. => result = None,
         }
 
@@ -166,7 +166,8 @@ impl CPU {
     // 
     // ````` Data types `````
     // n: one-byte unsigned int
-    // nn: two-byte unsigned int
+    // nn: two-byte unsigned int. 
+    // *First n operand after the opcode is lower-order byte
     // d: one-byte signed int
     // b: one-bit expression in range (0 to 7)??
     // e: one-byte signed int for relative jump offset
@@ -361,12 +362,63 @@ impl CPU {
     }
 
     /* 16 Bit Load Group */
- 
+     
+    /// ld_dd_nn: 2-byte integer nn is loaded to dd register pair.
+    /// 3-byte instruction
+    pub fn ld_dd_nn(dd: u8, nn: u16) -> ProgramCounter {
+        load_nn_to(dd, nn);
 
+        ProgramCounter::Next(3)
+    }
 
+    /// ld_IX_nn: 2-byte integer nn is loaded to Index Reg IX.
+    /// 4-byte instruction
+    pub fn ld_IX_nn(nn: u16) -> ProgramCounter {
+        self.reg.IX = nn;
 
+        ProgramCounter::Next(4)
+    }
 
+    /// ld_IY_nn: 2-byte integer nn is loaded to Index Reg IY.
+    /// 4-byte instruction
+    pub fn ld_IY_nn(nn: u16) -> ProgramCounter {
+        self.reg.IY = nn;
 
+        ProgramCounter::Next(4)
+    }
+
+    /// ld_HL_nn: Contents of memory address (nn) are loaded to low-order byte of HL and contents
+    /// of next memory address (nn + 1) are loaded to higher-order portion of HL.
+    /// 3-byte instruction
+    pub fn ld_HL_nn(nn: u16) -> ProgramCounter {
+        let content = self.ram[nn as usize] | 
+                            (self.ram[(nn + 1) as usize] << 8);
+        self.reg.HL = content as usize;
+
+        ProgramCounter::Next(3)
+    }
+
+    /// ld_dd_nn: Contents of  memory address (nn) are loaded to lower-byte register pair dd, while
+    /// content at (nn+1) are loaded to higher-order byte.
+    /// 4-byte instruction
+    pub fn ld_dd_nn(dd: u8, nn: u16) {
+        let content = self.ram[nn as usize] |
+                            (self.ram[(nn + 1) as usize] << 8);
+        load_nn_to(dd, content);
+
+        ProgramCounter::Next(4)
+    }
+
+    /// ld_IX_nn: Contents of memory address (nn) are loaded to lower-byte of IX, while content at
+    /// (nn+1) are loaded to higher-order byte.
+    /// 4-byte instruction
+    pub fn ld_IX_nn(nn: u16) {
+        let content = self.ram[nn as usize] |
+                        (self.ram[(nn + 1) as usize] << 8);
+        self.reg.IX = content as usize;
+
+        ProgramCounter::Next(4)
+    }
 
 
 
