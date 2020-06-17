@@ -21,8 +21,9 @@ const ID_BC: u8 = 0b000; // 16-bit registers
 const ID_DE: u8 = 0b001;
 const ID_HL: u8 = 0b010;
 const ID_SP: u8 = 0b011;
-const ID_IX: u8 = 0b110;
-const ID_IY: u8 = 0b111;
+const ID_IX: u8 = 0b100;
+const ID_IY: u8 = 0b101;
+const ID_AF: u8 = 0b011; // same as SP but it's okay, won't clash.
 
 // Implementing registers
 pub struct Registers {
@@ -49,11 +50,13 @@ pub struct Registers {
     pub mut L_: u8,
 
     // 16-bit combined registers
+    pub mut AF: u16
     pub mut BC: u16
     pub mut DE: u16,   
     pub mut HL: u16,   
 
     // 16-bit combined alternate registers
+    pub mut AF_: u16,
     pub mut BC_: u16,   
     pub mut DE_: u16,    
     pub mut HL_: u16,     
@@ -213,6 +216,8 @@ impl CPU {
             None => return (),
         }
     }
+    
+    /// push: Takes in a 2-byte register ID (reg_id). 
 
     // NOTATION
     //
@@ -511,10 +516,32 @@ impl CPU {
         ProgramCounter::Next(4)
     }
     
-    
+    /// ld_SP_HL: Contents of register pair HL are loaded to SP
+    /// 1-byte instruction
+    pub fn ld_SP_HL() -> ProgramCounter {
+        self.reg.SP = self.reg.HL;
 
+        ProgramCounter::Next(1)
+    }
 
+    /// ld_SP_IX: Contents of register pair IX are loaded to SP
+    /// 2-byte instruction
+    pub fn ld_SP_IX() -> ProgramCounter {
+        self.reg.SP = self.reg.IX;
 
+        ProgramCounter::Next(2)
+    }
+
+    /// ld_SP_IY: Contents of register pair IY are loaded to SP
+    /// 2-byte instruction
+    pub fn ld_SP_IY() -> ProgramCounter {
+        self.reg.SP = self.reg.IY;
+
+        ProgramCounter::Next(2)
+    }
+
+    /// push_qq: Contents of register pair qq are pushed to external memory LIFO stack. Stack
+    /// pointer hold 16-bit addr of top of stack.
 
 
 
