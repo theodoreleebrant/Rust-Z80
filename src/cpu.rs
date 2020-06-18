@@ -83,6 +83,8 @@ pub struct CPU {        // Move to own file later
     pub mut data_bus: u8,   // 8-bit data bus
 
     pub mut ram: [u8; 65536],  // 64KB RAM
+    pub mut stack: Vec<u8>,
+
     pub mut clock: u32, // Timing matters
     
     // Control signals. Supposedly just bits but Rust doesn't treat boolean as 0 and 1. Check out
